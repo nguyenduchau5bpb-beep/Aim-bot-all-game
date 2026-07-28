@@ -1,4 +1,4 @@
--- [[ MRGHOST HUB VIP - TRACER TOP-CENTER (OLD STYLE) ]]
+-- [[ MRGHOST HUB VIP - UNIVERSAL FOR ALL ROBLOX GAMES ]]
 local success, err = pcall(function()
 
     -- Services
@@ -30,18 +30,18 @@ local success, err = pcall(function()
 
     local AimbotEnabled = false
     local AimPart = "Head"
-    local Sensitivity = 0.2
+    local Sensitivity = 0.25
 
     local ShowFOV = true
     local FOVRadius = 120
 
     local ESPEnabled = false
     local TracersEnabled = false
-    local TeamCheckEnabled = true
+    local TeamCheckEnabled = false -- Mặc định tắt để All Game đều ngắm được ngay!
 
     -- Universal GUI Container
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "MrGhostHub_OldTracer"
+    ScreenGui.Name = "MrGhostHub_UniversalAllGames"
     local guiParent = (gethui and gethui()) or CoreGui or (LocalPlayer and LocalPlayer:WaitForChild("PlayerGui"))
     ScreenGui.Parent = guiParent
     ScreenGui.ResetOnSpawn = false
@@ -52,7 +52,7 @@ local success, err = pcall(function()
         return Color3.fromHSV((tick() % speed) / speed, 0.8, 1)
     end
 
-    -- ⭕ FOV CIRCLE (UI FRAME)
+    -- ⭕ PERFECT FOV CIRCLE (UI FRAME)
     local FOVFrame = Instance.new("Frame")
     FOVFrame.Name = "FOVCircleFrame"
     FOVFrame.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -115,52 +115,58 @@ local success, err = pcall(function()
         end)
     end
 
-    -- 👥 HÀM KIỂM TRA ĐỒNG MINH
+    -- 👥 HÀM KIỂM TRA TEAM UNIVERSAL (CHO TẤT CẢ GAME)
     local function isTeammate(player)
         if not TeamCheckEnabled then return false end
         if player == LocalPlayer then return true end
 
-        if player.Team and LocalPlayer.Team then
-            return player.Team == LocalPlayer.Team
+        -- 1. Standard Roblox Team
+        if player.Team and LocalPlayer.Team and player.Team == LocalPlayer.Team then
+            return true
+        end
+        if player.TeamColor and LocalPlayer.TeamColor and player.TeamColor == LocalPlayer.TeamColor then
+            return true
         end
 
-        if player.TeamColor and LocalPlayer.TeamColor then
-            return player.TeamColor == LocalPlayer.TeamColor
-        end
+        -- 2. Leaderstats & Custom Attributes
+        local pTeam = player:FindFirstChild("Team") or player:GetAttribute("Team") or (player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("Team"))
+        local myTeam = LocalPlayer:FindFirstChild("Team") or LocalPlayer:GetAttribute("Team") or (LocalPlayer:FindFirstChild("leaderstats") and LocalPlayer.leaderstats:FindFirstChild("Team"))
 
-        local myTeam = LocalPlayer:FindFirstChild("Team") or (LocalPlayer:FindFirstChild("leaderstats") and LocalPlayer.leaderstats:FindFirstChild("Team"))
-        local targetTeam = player:FindFirstChild("Team") or (player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("Team"))
-        if myTeam and targetTeam then
-            return myTeam.Value == targetTeam.Value
+        if pTeam and myTeam then
+            local pVal = (type(pTeam) == "userdata" and pTeam.Value) or pTeam
+            local myVal = (type(myTeam) == "userdata" and myTeam.Value) or myTeam
+            if pVal == myVal then return true end
         end
 
         return false
     end
 
-    -- Aimbot Target Search
+    -- 🎯 AIMBOT UNIVERSAL
     local function getClosestEnemy()
-        local closestPlayer = nil
+        local closestTarget = nil
         local shortestDistance = FOVRadius
         local centerPos = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
         for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character and not isTeammate(player) then
-                local targetPart = player.Character:FindFirstChild(AimPart) or player.Character:FindFirstChild("HumanoidRootPart")
-                local hum = player.Character:FindFirstChildOfClass("Humanoid")
+            if player ~= LocalPlayer and player.Character then
+                if not isTeammate(player) then
+                    local targetPart = player.Character:FindFirstChild(AimPart) or player.Character:FindFirstChild("HumanoidRootPart")
+                    local hum = player.Character:FindFirstChildOfClass("Humanoid")
 
-                if hum and hum.Health > 0 and targetPart then
-                    local screenPos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
-                    if onScreen then
-                        local distance = (Vector2.new(screenPos.X, screenPos.Y) - centerPos).Magnitude
-                        if distance < shortestDistance then
-                            shortestDistance = distance
-                            closestPlayer = targetPart
+                    if hum and hum.Health > 0 and targetPart then
+                        local screenPos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
+                        if onScreen then
+                            local distance = (Vector2.new(screenPos.X, screenPos.Y) - centerPos).Magnitude
+                            if distance < shortestDistance then
+                                shortestDistance = distance
+                                closestTarget = targetPart
+                            end
                         end
                     end
                 end
             end
         end
-        return closestPlayer
+        return closestTarget
     end
 
     -- ESP Storage
@@ -395,7 +401,7 @@ local success, err = pcall(function()
 
         createToggleCard("🎯 Aim Lock (Tự Khóa Địch)", false, 7, function(st) AimbotEnabled = st end)
 
-        createToggleCard("👥 Bật Chia Team (Đồng Minh/Địch)", true, 8, function(st) TeamCheckEnabled = st end)
+        createToggleCard("👥 Bật Chia Team (Đồng Minh/Địch)", false, 8, function(st) TeamCheckEnabled = st end)
 
         local PartBtn = Instance.new("TextButton")
         PartBtn.Size = UDim2.new(1, -4, 0, 36)
@@ -559,7 +565,7 @@ local success, err = pcall(function()
                 end
             end
 
-            -- Aimbot
+            -- AIMBOT LOCK
             if AimbotEnabled then
                 local target = getClosestEnemy()
                 if target then
@@ -591,7 +597,7 @@ local success, err = pcall(function()
                             drawings.Box.Visible = true
 
                             local dist = math.floor((LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and (LocalPlayer.Character.HumanoidRootPart.Position - hrp.Position).Magnitude) or 0)
-                            local teamTag = teammate and " [ĐỒNG MINH]" or " [ĐỊCH]"
+                            local teamTag = teammate and " [ĐỒNG MINH]" or " [MỤC TIÊU]"
                             drawings.Name.Text = player.Name .. teamTag .. " [" .. dist .. "m]"
                             drawings.Name.Position = Vector2.new(pos.X, pos.Y - height / 2 - 15)
                             drawings.Name.Visible = true
@@ -600,7 +606,6 @@ local success, err = pcall(function()
                         end
 
                         if TracersEnabled then
-                            -- TRACER KIỂU CỦ: Kẻ từ ĐỈNH MÀN HÌNH (Top Center)
                             drawings.Tracer.From = Vector2.new(Camera.ViewportSize.X * 0.5, 0)
                             drawings.Tracer.To = Vector2.new(pos.X, pos.Y)
                             drawings.Tracer.Color = espColor
@@ -619,7 +624,7 @@ local success, err = pcall(function()
 
         game:GetService("StarterGui"):SetCore("SendNotification", {
             Title = "★ MRGHOST HUB VIP ★",
-            Text = "Đã chuyển đường Tracer về ĐỈNH MÀN HÌNH!",
+            Text = "Đã kích hoạt Universal All Games!",
             Duration = 3
         })
     end
@@ -740,3 +745,4 @@ local success, err = pcall(function()
         end)
     end
 end)
+ 
