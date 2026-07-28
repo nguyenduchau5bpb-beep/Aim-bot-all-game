@@ -1,4 +1,4 @@
--- [[ MRGHOST HUB VIP - ULTIMATE MODERN UI EDITION ]]
+-- [[ MRGHOST HUB VIP - FOV FIXED EDITION ]]
 local success, err = pcall(function()
 
     -- Services
@@ -40,29 +40,28 @@ local success, err = pcall(function()
 
     -- Universal GUI Container
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "MrGhostHub_ModernVIP"
+    ScreenGui.Name = "MrGhostHub_FOVFixed"
     local guiParent = (gethui and gethui()) or CoreGui or (LocalPlayer and LocalPlayer:WaitForChild("PlayerGui"))
     ScreenGui.Parent = guiParent
     ScreenGui.ResetOnSpawn = false
 
-    -- Helper Color Gradient & RGB
+    -- Fast RGB
     local function getRGBColor(speed)
         speed = speed or 3
-        local hue = (tick() % speed) / speed
-        return Color3.fromHSV(hue, 0.8, 1)
+        return Color3.fromHSV((tick() % speed) / speed, 0.8, 1)
     end
 
-    -- FOV Drawing
+    -- Khởi tạo FOV Drawing chuẩn
     local FOVCircle = Drawing.new("Circle")
-    FOVCircle.Thickness = 1.5
+    FOVCircle.Thickness = 1.8
     FOVCircle.Color = Color3.fromRGB(0, 240, 255)
     FOVCircle.Filled = false
-    FOVCircle.Transparency = 0.85
+    FOVCircle.Transparency = 1
     FOVCircle.NumSides = 64
-    FOVCircle.Visible = ShowFOV
+    FOVCircle.Visible = true
     FOVCircle.Radius = FOVRadius
 
-    -- Touch / Mouse Draggable Smooth
+    -- Draggable Smooth Optimization
     local function makeDraggable(gui)
         local dragging, dragInput, dragStart, startPos
         gui.InputBegan:Connect(function(input)
@@ -88,7 +87,7 @@ local success, err = pcall(function()
         end)
     end
 
-    -- Key Cache
+    -- Key Cache System
     local function isKeySavedValid()
         if readfile and isfile and isfile(CACHE_FILE) then
             local successRead, data = pcall(function() return HttpService:JSONDecode(readfile(CACHE_FILE)) end)
@@ -105,14 +104,13 @@ local success, err = pcall(function()
         end
     end
 
+    -- Lấy Tâm Màn Hình Chuẩn (Mọi thiết bị)
     local function getCenterPosition()
-        if UserInputService.TouchEnabled and not UserInputService.MouseEnabled then
-            return Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-        else
-            return UserInputService:GetMouseLocation()
-        end
+        local viewportSize = Camera.ViewportSize
+        return Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
     end
 
+    -- Optimized Aimbot Target Search (Không aim đồng minh)
     local function getClosestEnemy()
         local closestPlayer = nil
         local shortestDistance = FOVRadius
@@ -120,19 +118,23 @@ local success, err = pcall(function()
 
         for _, player in pairs(Players:GetPlayers()) do
             if player ~= LocalPlayer and player.Character then
-                local targetPart = player.Character:FindFirstChild(AimPart) or player.Character:FindFirstChild("HumanoidRootPart")
-                local hum = player.Character:FindFirstChildOfClass("Humanoid")
-
                 local isEnemy = true
-                if player.Team and LocalPlayer.Team and player.Team == LocalPlayer.Team then isEnemy = false end
+                if player.Team and LocalPlayer.Team and player.Team == LocalPlayer.Team then
+                    isEnemy = false
+                end
 
-                if hum and hum.Health > 0 and isEnemy and targetPart then
-                    local screenPos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
-                    if onScreen then
-                        local distance = (Vector2.new(screenPos.X, screenPos.Y) - centerPos).Magnitude
-                        if distance < shortestDistance then
-                            shortestDistance = distance
-                            closestPlayer = targetPart
+                if isEnemy then
+                    local targetPart = player.Character:FindFirstChild(AimPart) or player.Character:FindFirstChild("HumanoidRootPart")
+                    local hum = player.Character:FindFirstChildOfClass("Humanoid")
+
+                    if hum and hum.Health > 0 and targetPart then
+                        local screenPos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
+                        if onScreen then
+                            local distance = (Vector2.new(screenPos.X, screenPos.Y) - centerPos).Magnitude
+                            if distance < shortestDistance then
+                                shortestDistance = distance
+                                closestPlayer = targetPart
+                            end
                         end
                     end
                 end
@@ -152,17 +154,21 @@ local success, err = pcall(function()
         }
         drawings.Box.Thickness = 1.5
         drawings.Box.Filled = false
-        drawings.Name.Size = 13
+        drawings.Name.Size = 12
         drawings.Name.Center = true
         drawings.Name.Outline = true
         drawings.Name.Color = Color3.fromRGB(255, 255, 255)
-        drawings.Tracer.Thickness = 1.5
+        drawings.Tracer.Thickness = 1.2
         ESP_Storage[player] = drawings
     end
 
     local function removeESP(player)
         if ESP_Storage[player] then
-            for _, drawing in pairs(ESP_Storage[player]) do drawing:Remove() end
+            pcall(function()
+                ESP_Storage[player].Box:Remove()
+                ESP_Storage[player].Name:Remove()
+                ESP_Storage[player].Tracer:Remove()
+            end)
             ESP_Storage[player] = nil
         end
     end
@@ -171,21 +177,19 @@ local success, err = pcall(function()
     Players.PlayerAdded:Connect(createESP)
     Players.PlayerRemoving:Connect(removeESP)
 
-    -- =========================================================
-    -- MODERN MAIN HUB (GLASSMORPHISM STYLE)
-    -- =========================================================
+    -- MAIN HUB UI
     local function loadMainHub()
         local MainFrame = Instance.new("Frame")
         MainFrame.Name = "MainFrame"
         MainFrame.Size = UDim2.new(0, 330, 0, 400)
         MainFrame.Position = UDim2.new(0.5, -165, 0.3, -200)
         MainFrame.BackgroundColor3 = Color3.fromRGB(15, 17, 26)
-        MainFrame.BackgroundTransparency = 0.1
+        MainFrame.BackgroundTransparency = 0.15
         MainFrame.BorderSizePixel = 0
         MainFrame.Parent = ScreenGui
 
         local MainCorner = Instance.new("UICorner")
-        MainCorner.CornerRadius = UDim.new(0, 18)
+        MainCorner.CornerRadius = UDim.new(0, 16)
         MainCorner.Parent = MainFrame
 
         local UIStroke = Instance.new("UIStroke")
@@ -193,58 +197,58 @@ local success, err = pcall(function()
         UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
         UIStroke.Parent = MainFrame
 
-        -- Modern Header
+        -- Title Bar
         local TitleBar = Instance.new("Frame")
-        TitleBar.Size = UDim2.new(1, 0, 0, 48)
+        TitleBar.Size = UDim2.new(1, 0, 0, 46)
         TitleBar.BackgroundColor3 = Color3.fromRGB(22, 25, 38)
-        TitleBar.BackgroundTransparency = 0.3
+        TitleBar.BackgroundTransparency = 0.2
         TitleBar.Parent = MainFrame
 
         local TitleBarCorner = Instance.new("UICorner")
-        TitleBarCorner.CornerRadius = UDim.new(0, 18)
+        TitleBarCorner.CornerRadius = UDim.new(0, 16)
         TitleBarCorner.Parent = TitleBar
 
         local LogoIcon = Instance.new("TextLabel")
-        LogoIcon.Size = UDim2.new(0, 32, 0, 32)
-        LogoIcon.Position = UDim2.new(0, 10, 0.5, -16)
+        LogoIcon.Size = UDim2.new(0, 30, 0, 30)
+        LogoIcon.Position = UDim2.new(0, 10, 0.5, -15)
         LogoIcon.BackgroundColor3 = Color3.fromRGB(255, 0, 110)
         LogoIcon.Text = "👻"
-        LogoIcon.TextSize = 16
+        LogoIcon.TextSize = 15
         LogoIcon.Parent = TitleBar
 
         local LogoCorner = Instance.new("UICorner")
-        LogoCorner.CornerRadius = UDim.new(0, 10)
+        LogoCorner.CornerRadius = UDim.new(0, 8)
         LogoCorner.Parent = LogoIcon
 
         local Title = Instance.new("TextLabel")
         Title.Size = UDim2.new(0, 160, 1, 0)
-        Title.Position = UDim2.new(0, 50, 0, 0)
+        Title.Position = UDim2.new(0, 48, 0, 0)
         Title.BackgroundTransparency = 1
-        Title.Text = "MrGhost Hub"
+        Title.Text = "MrGhost Hub VIP"
         Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-        Title.TextSize = 16
+        Title.TextSize = 15
         Title.Font = Enum.Font.GothamBold
         Title.TextXAlignment = Enum.TextXAlignment.Left
         Title.Parent = TitleBar
 
         local HeartLabel = Instance.new("TextLabel")
         HeartLabel.Size = UDim2.new(0, 80, 1, 0)
-        HeartLabel.Position = UDim2.new(1, -90, 0, 0)
+        HeartLabel.Position = UDim2.new(1, -88, 0, 0)
         HeartLabel.BackgroundTransparency = 1
         HeartLabel.Text = "💖 TTTT"
         HeartLabel.TextColor3 = Color3.fromRGB(255, 120, 190)
-        HeartLabel.TextSize = 13
+        HeartLabel.TextSize = 12
         HeartLabel.Font = Enum.Font.GothamBold
         HeartLabel.Parent = TitleBar
 
-        -- Scroll View
+        -- Scrolling Container
         local Scroll = Instance.new("ScrollingFrame")
-        Scroll.Size = UDim2.new(1, -16, 1, -56)
-        Scroll.Position = UDim2.new(0, 8, 0, 52)
+        Scroll.Size = UDim2.new(1, -16, 1, -54)
+        Scroll.Position = UDim2.new(0, 8, 0, 50)
         Scroll.BackgroundTransparency = 1
         Scroll.BorderSizePixel = 0
         Scroll.ScrollBarThickness = 3
-        Scroll.CanvasSize = UDim2.new(0, 0, 0, 680)
+        Scroll.CanvasSize = UDim2.new(0, 0, 0, 660)
         Scroll.Parent = MainFrame
 
         local UIList = Instance.new("UIListLayout")
@@ -252,17 +256,17 @@ local success, err = pcall(function()
         UIList.SortOrder = Enum.SortOrder.LayoutOrder
         UIList.Padding = UDim.new(0, 6)
 
-        -- Modern Toggle Card
+        -- Helper Toggles
         local function createToggleCard(titleText, defaultState, layoutOrder, callback)
             local Card = Instance.new("Frame")
-            Card.Size = UDim2.new(1, -4, 0, 42)
+            Card.Size = UDim2.new(1, -4, 0, 40)
             Card.BackgroundColor3 = Color3.fromRGB(24, 28, 42)
             Card.BackgroundTransparency = 0.2
             Card.LayoutOrder = layoutOrder
             Card.Parent = Scroll
 
             local CardCorner = Instance.new("UICorner")
-            CardCorner.CornerRadius = UDim.new(0, 10)
+            CardCorner.CornerRadius = UDim.new(0, 8)
             CardCorner.Parent = Card
 
             local CardLabel = Instance.new("TextLabel")
@@ -278,7 +282,7 @@ local success, err = pcall(function()
 
             local SwitchBg = Instance.new("TextButton")
             SwitchBg.Size = UDim2.new(0, 44, 0, 22)
-            SwitchBg.Position = UDim2.new(1, -52, 0.5, -11)
+            SwitchBg.Position = UDim2.new(1, -50, 0.5, -11)
             SwitchBg.BackgroundColor3 = defaultState and Color3.fromRGB(255, 0, 110) or Color3.fromRGB(45, 52, 75)
             SwitchBg.Text = ""
             SwitchBg.AutoButtonColor = false
@@ -302,33 +306,32 @@ local success, err = pcall(function()
             SwitchBg.MouseButton1Click:Connect(function()
                 enabled = not enabled
                 if enabled then
-                    TweenService:Create(SwitchBg, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 0, 110)}):Play()
-                    TweenService:Create(SwitchDot, TweenInfo.new(0.2), {Position = UDim2.new(1, -19, 0.5, -8)}):Play()
+                    TweenService:Create(SwitchBg, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 0, 110)}):Play()
+                    TweenService:Create(SwitchDot, TweenInfo.new(0.15), {Position = UDim2.new(1, -19, 0.5, -8)}):Play()
                 else
-                    TweenService:Create(SwitchBg, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 52, 75)}):Play()
-                    TweenService:Create(SwitchDot, TweenInfo.new(0.2), {Position = UDim2.new(0, 3, 0.5, -8)}):Play()
+                    TweenService:Create(SwitchBg, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(45, 52, 75)}):Play()
+                    TweenService:Create(SwitchDot, TweenInfo.new(0.15), {Position = UDim2.new(0, 3, 0.5, -8)}):Play()
                 end
                 callback(enabled)
             end)
             return Card
         end
 
-        -- Modern Input Card
         local function createInputCard(titleText, placeholderText, defaultVal, layoutOrder, callback)
             local Card = Instance.new("Frame")
-            Card.Size = UDim2.new(1, -4, 0, 58)
+            Card.Size = UDim2.new(1, -4, 0, 56)
             Card.BackgroundColor3 = Color3.fromRGB(24, 28, 42)
             Card.BackgroundTransparency = 0.2
             Card.LayoutOrder = layoutOrder
             Card.Parent = Scroll
 
             local CardCorner = Instance.new("UICorner")
-            CardCorner.CornerRadius = UDim.new(0, 10)
+            CardCorner.CornerRadius = UDim.new(0, 8)
             CardCorner.Parent = Card
 
             local InputLabel = Instance.new("TextLabel")
             InputLabel.Size = UDim2.new(1, -20, 0, 18)
-            InputLabel.Position = UDim2.new(0, 10, 0, 6)
+            InputLabel.Position = UDim2.new(0, 10, 0, 4)
             InputLabel.BackgroundTransparency = 1
             InputLabel.Text = titleText
             InputLabel.TextColor3 = Color3.fromRGB(0, 230, 255)
@@ -339,7 +342,7 @@ local success, err = pcall(function()
 
             local TextBox = Instance.new("TextBox")
             TextBox.Size = UDim2.new(1, -20, 0, 24)
-            TextBox.Position = UDim2.new(0, 10, 0, 26)
+            TextBox.Position = UDim2.new(0, 10, 0, 24)
             TextBox.BackgroundColor3 = Color3.fromRGB(16, 18, 28)
             TextBox.Text = tostring(defaultVal)
             TextBox.PlaceholderText = placeholderText
@@ -360,8 +363,8 @@ local success, err = pcall(function()
             return Card
         end
 
-        -- BẢNG CHỨC NĂNG
-        createToggleCard("⚡ Chạy Nhanh (Speed)", false, 1, function(st) speedEnabled = st end)
+        -- DÀN TÍNH NĂNG
+        createToggleCard("⚡ Chạy Nhanh (WalkSpeed)", false, 1, function(st) speedEnabled = st end)
         createInputCard("🏃 Tốc Độ Di Chuyển", "Nhập Speed...", 50, 2, function(val) walkSpeedValue = val end)
 
         createToggleCard("🦘 Nhảy Cao (JumpPower)", false, 3, function(st) jumpEnabled = st end)
@@ -373,7 +376,7 @@ local success, err = pcall(function()
         createToggleCard("🎯 Aim Lock (Tự Khóa Địch)", false, 7, function(st) AimbotEnabled = st end)
 
         local PartBtn = Instance.new("TextButton")
-        PartBtn.Size = UDim2.new(1, -4, 0, 38)
+        PartBtn.Size = UDim2.new(1, -4, 0, 36)
         PartBtn.BackgroundColor3 = Color3.fromRGB(24, 28, 42)
         PartBtn.BackgroundTransparency = 0.2
         PartBtn.Text = "🎯 Vị Trí Ngắm: HEAD (Đầu)"
@@ -384,7 +387,7 @@ local success, err = pcall(function()
         PartBtn.Parent = Scroll
 
         local PartCorner = Instance.new("UICorner")
-        PartCorner.CornerRadius = UDim.new(0, 10)
+        PartCorner.CornerRadius = UDim.new(0, 8)
         PartCorner.Parent = PartBtn
 
         local partsList = {
@@ -402,20 +405,20 @@ local success, err = pcall(function()
 
         createToggleCard("⭕ Hiện Vòng Tròn FOV", true, 9, function(st) ShowFOV = st end)
 
-        -- Modern Slider
+        -- Slider FOV
         local SliderCard = Instance.new("Frame")
-        SliderCard.Size = UDim2.new(1, -4, 0, 50)
+        SliderCard.Size = UDim2.new(1, -4, 0, 48)
         SliderCard.BackgroundColor3 = Color3.fromRGB(24, 28, 42)
         SliderCard.BackgroundTransparency = 0.2
         SliderCard.LayoutOrder = 10
         SliderCard.Parent = Scroll
 
         local SliderCorner = Instance.new("UICorner")
-        SliderCorner.CornerRadius = UDim.new(0, 10)
+        SliderCorner.CornerRadius = UDim.new(0, 8)
         SliderCorner.Parent = SliderCard
 
         local SliderLabel = Instance.new("TextLabel")
-        SliderLabel.Size = UDim2.new(1, -20, 0, 18)
+        SliderLabel.Size = UDim2.new(1, -20, 0, 16)
         SliderLabel.Position = UDim2.new(0, 10, 0, 4)
         SliderLabel.BackgroundTransparency = 1
         SliderLabel.Text = "📏 Kích Thước FOV: " .. FOVRadius
@@ -426,8 +429,8 @@ local success, err = pcall(function()
         SliderLabel.Parent = SliderCard
 
         local SliderTrack = Instance.new("Frame")
-        SliderTrack.Size = UDim2.new(1, -20, 0, 8)
-        SliderTrack.Position = UDim2.new(0, 10, 0, 28)
+        SliderTrack.Size = UDim2.new(1, -20, 0, 6)
+        SliderTrack.Position = UDim2.new(0, 10, 0, 26)
         SliderTrack.BackgroundColor3 = Color3.fromRGB(16, 18, 28)
         SliderTrack.Parent = SliderCard
 
@@ -473,13 +476,13 @@ local success, err = pcall(function()
         createToggleCard("📦 ESP Box & Tên Player", false, 11, function(st) ESPEnabled = st end)
         createToggleCard("⚡ Đường Kẻ Tracer Player", false, 12, function(st) TracersEnabled = st end)
 
-        -- NÚT THU GỌN MODERN HUB (ROUND NEON BUTTON)
+        -- NÚT THU GỌN HUB TRÒN
         local ToggleMenuBtn = Instance.new("TextButton")
-        ToggleMenuBtn.Size = UDim2.new(0, 48, 0, 48)
+        ToggleMenuBtn.Size = UDim2.new(0, 46, 0, 46)
         ToggleMenuBtn.Position = UDim2.new(0.04, 0, 0.2, 0)
         ToggleMenuBtn.BackgroundColor3 = Color3.fromRGB(15, 17, 26)
         ToggleMenuBtn.Text = "👻"
-        ToggleMenuBtn.TextSize = 20
+        ToggleMenuBtn.TextSize = 18
         ToggleMenuBtn.Parent = ScreenGui
 
         local ToggleCorner = Instance.new("UICorner")
@@ -515,12 +518,13 @@ local success, err = pcall(function()
             end
         end)
 
-        -- RENDER LOOP
+        -- RENDER LOOP (ĐÃ FIX TỌA ĐỘ VÒNG FOV)
         RunService.RenderStepped:Connect(function()
             local rainbowColor = getRGBColor(3)
             UIStroke.Color = rainbowColor
             ToggleStroke.Color = rainbowColor
 
+            -- WalkSpeed & JumpPower
             if LocalPlayer.Character then
                 local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
                 if hum then
@@ -529,6 +533,7 @@ local success, err = pcall(function()
                 end
             end
 
+            -- Render FOV Circle luôn ở chính giữa màn hình
             if ShowFOV then
                 FOVCircle.Visible = true
                 FOVCircle.Radius = FOVRadius
@@ -537,6 +542,7 @@ local success, err = pcall(function()
                 FOVCircle.Visible = false
             end
 
+            -- Aimbot
             if AimbotEnabled then
                 local target = getClosestEnemy()
                 if target then
@@ -544,6 +550,7 @@ local success, err = pcall(function()
                 end
             end
 
+            -- ESP Rendering
             for player, drawings in pairs(ESP_Storage) do
                 local char = player.Character
                 if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChildOfClass("Humanoid") and char.Humanoid.Health > 0 then
@@ -569,14 +576,14 @@ local success, err = pcall(function()
                             local dist = math.floor((LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and (LocalPlayer.Character.HumanoidRootPart.Position - hrp.Position).Magnitude) or 0)
                             local teamTag = isTeammate and " [ĐỒNG MINH]" or " [ĐỊCH]"
                             drawings.Name.Text = player.Name .. teamTag .. " [" .. dist .. "m]"
-                            drawings.Name.Position = Vector2.new(pos.X, pos.Y - height / 2 - 16)
+                            drawings.Name.Position = Vector2.new(pos.X, pos.Y - height / 2 - 15)
                             drawings.Name.Visible = true
                         else
                             drawings.Box.Visible = false; drawings.Name.Visible = false
                         end
 
                         if TracersEnabled then
-                            drawings.Tracer.From = Vector2.new(Camera.ViewportSize.X / 2, 0)
+                            drawings.Tracer.From = Vector2.new(Camera.ViewportSize.X * 0.5, 0)
                             drawings.Tracer.To = Vector2.new(pos.X, pos.Y)
                             drawings.Tracer.Color = espColor
                             drawings.Tracer.Visible = true
@@ -594,24 +601,24 @@ local success, err = pcall(function()
 
         game:GetService("StarterGui"):SetCore("SendNotification", {
             Title = "★ MRGHOST HUB VIP ★",
-            Text = "Giao diện Modern Cyberpunk đã kích hoạt!",
+            Text = "Đã fix hiển thị vòng FOV thành công!",
             Duration = 3
         })
     end
 
-    -- MODERN KEY SYSTEM UI
+    -- KEY SYSTEM UI
     if isKeySavedValid() then
         loadMainHub()
     else
         local KeyFrame = Instance.new("Frame")
         KeyFrame.Name = "KeyFrame"
-        KeyFrame.Size = UDim2.new(0, 300, 0, 220)
-        KeyFrame.Position = UDim2.new(0.5, -150, 0.4, -110)
+        KeyFrame.Size = UDim2.new(0, 290, 0, 210)
+        KeyFrame.Position = UDim2.new(0.5, -145, 0.4, -105)
         KeyFrame.BackgroundColor3 = Color3.fromRGB(15, 17, 26)
         KeyFrame.Parent = ScreenGui
 
         local KeyCorner = Instance.new("UICorner")
-        KeyCorner.CornerRadius = UDim.new(0, 16)
+        KeyCorner.CornerRadius = UDim.new(0, 14)
         KeyCorner.Parent = KeyFrame
 
         local KeyStroke = Instance.new("UIStroke")
@@ -641,12 +648,12 @@ local success, err = pcall(function()
         KeyTextBox.Parent = KeyFrame
 
         local BoxCorner = Instance.new("UICorner")
-        BoxCorner.CornerRadius = UDim.new(0, 8)
+        BoxCorner.CornerRadius = UDim.new(0, 6)
         BoxCorner.Parent = KeyTextBox
 
         local CheckBtn = Instance.new("TextButton")
         CheckBtn.Size = UDim2.new(0.46, -4, 0, 32)
-        CheckBtn.Position = UDim2.new(0, 14, 0, 82)
+        CheckBtn.Position = UDim2.new(0, 14, 0, 80)
         CheckBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 110)
         CheckBtn.Text = "Check Key"
         CheckBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -655,12 +662,12 @@ local success, err = pcall(function()
         CheckBtn.Parent = KeyFrame
 
         local BtnCorner1 = Instance.new("UICorner")
-        BtnCorner1.CornerRadius = UDim.new(0, 8)
+        BtnCorner1.CornerRadius = UDim.new(0, 6)
         BtnCorner1.Parent = CheckBtn
 
         local GetKeyBtn = Instance.new("TextButton")
         GetKeyBtn.Size = UDim2.new(0.46, -4, 0, 32)
-        GetKeyBtn.Position = UDim2.new(0.54, 0, 0, 82)
+        GetKeyBtn.Position = UDim2.new(0.54, 0, 0, 80)
         GetKeyBtn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
         GetKeyBtn.Text = "Discord Key"
         GetKeyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -670,7 +677,7 @@ local success, err = pcall(function()
 
         local BackupBtn = Instance.new("TextButton")
         BackupBtn.Size = UDim2.new(1, -28, 0, 30)
-        BackupBtn.Position = UDim2.new(0, 14, 0, 122)
+        BackupBtn.Position = UDim2.new(0, 14, 0, 120)
         BackupBtn.BackgroundColor3 = Color3.fromRGB(255, 140, 0)
         BackupBtn.Text = "🔗 Copy Link Lấy Key"
         BackupBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -679,12 +686,12 @@ local success, err = pcall(function()
         BackupBtn.Parent = KeyFrame
 
         local BtnCorner3 = Instance.new("UICorner")
-        BtnCorner3.CornerRadius = UDim.new(0, 8)
+        BtnCorner3.CornerRadius = UDim.new(0, 6)
         BtnCorner3.Parent = BackupBtn
 
         local StatusText = Instance.new("TextLabel")
         StatusText.Size = UDim2.new(1, -28, 0, 20)
-        StatusText.Position = UDim2.new(0, 14, 0, 160)
+        StatusText.Position = UDim2.new(0, 14, 0, 156)
         StatusText.BackgroundTransparency = 1
         StatusText.Text = "Nhập key 'TTTT' để bắt đầu"
         StatusText.TextColor3 = Color3.fromRGB(160, 170, 190)
@@ -704,9 +711,9 @@ local success, err = pcall(function()
 
         CheckBtn.MouseButton1Click:Connect(function()
             if KeyTextBox.Text == CORRECT_KEY then
-                StatusText.Text = "🎉 Đang mở Modern Hub..."
+                StatusText.Text = "🎉 Đang tải Hub..."
                 saveKeyCache(KeyTextBox.Text)
-                task.wait(0.5)
+                task.wait(0.3)
                 KeyFrame:Destroy()
                 loadMainHub()
             else
