@@ -1,4 +1,4 @@
- -- [[ MRGHOST HUB VIP - ALL IN ONE ULTIMATE EDITION ]]
+-- [[ MRGHOST HUB VIP - ALL IN ONE ULTIMATE EDITION ]]
 local success, err = pcall(function()
 
     -- Services
@@ -638,3 +638,161 @@ local success, err = pcall(function()
             Title = "★ MRGHOST HUB VIP ★",
             Text = "Đã kích hoạt thành công All-In-One Hub!",
             Duration = 3
+        })
+    end
+
+    -- =========================================================
+    -- KEY SYSTEM UI
+    -- =========================================================
+    if isKeySavedValid() then
+        loadMainHub()
+    else
+        local KeyFrame = Instance.new("Frame")
+        KeyFrame.Name = "KeyFrame"
+        KeyFrame.Size = UDim2.new(0, 320, 0, 245)
+        KeyFrame.Position = UDim2.new(0.5, -160, 0.4, -122)
+        KeyFrame.BackgroundColor3 = Color3.fromRGB(12, 10, 18)
+        KeyFrame.Parent = ScreenGui
+
+        local KeyCorner = Instance.new("UICorner")
+        KeyCorner.CornerRadius = UDim.new(0, 16)
+        KeyCorner.Parent = KeyFrame
+
+        local KeyStroke = Instance.new("UIStroke")
+        KeyStroke.Thickness = 2
+        KeyStroke.Parent = KeyFrame
+
+        RunService.RenderStepped:Connect(function()
+            KeyStroke.Color = getRGBColor(3)
+        end)
+
+        local KeyTitle = Instance.new("TextLabel")
+        KeyTitle.Size = UDim2.new(1, 0, 0, 35)
+        KeyTitle.BackgroundTransparency = 1
+        KeyTitle.Text = "🔑 MRGHOST KEY SYSTEM 💖"
+        KeyTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+        KeyTitle.TextSize = 15
+        KeyTitle.Font = Enum.Font.FredokaOne
+        KeyTitle.Parent = KeyFrame
+
+        task.spawn(function()
+            while task.wait() do
+                if KeyTitle.Parent then
+                    TweenService:Create(KeyTitle, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {TextSize = 17}):Play()
+                    task.wait(0.5)
+                    TweenService:Create(KeyTitle, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {TextSize = 15}):Play()
+                    task.wait(0.5)
+                else break end
+            end
+        end)
+
+        local KeyTextBox = Instance.new("TextBox")
+        KeyTextBox.Size = UDim2.new(1, -32, 0, 34)
+        KeyTextBox.Position = UDim2.new(0, 16, 0, 38)
+        KeyTextBox.BackgroundColor3 = Color3.fromRGB(24, 20, 35)
+        KeyTextBox.PlaceholderText = "Nhập Key VIP tại đây..."
+        KeyTextBox.Text = ""
+        KeyTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+        KeyTextBox.TextSize = 13
+        KeyTextBox.Font = Enum.Font.SourceSansBold
+        KeyTextBox.Parent = KeyFrame
+
+        local BoxCorner = Instance.new("UICorner")
+        BoxCorner.CornerRadius = UDim.new(0, 8)
+        BoxCorner.Parent = KeyTextBox
+
+        local KeyNoteText = Instance.new("TextLabel")
+        KeyNoteText.Size = UDim2.new(1, -32, 0, 18)
+        KeyNoteText.Position = UDim2.new(0, 16, 0, 76)
+        KeyNoteText.BackgroundTransparency = 1
+        KeyNoteText.Text = "✨ Key vĩnh viễn (Get 1 lần duy nhất) ✨"
+        KeyNoteText.TextColor3 = Color3.fromRGB(0, 240, 255)
+        KeyNoteText.TextSize = 11
+        KeyNoteText.Font = Enum.Font.SourceSansBold
+        KeyNoteText.Parent = KeyFrame
+
+        local CheckBtn = Instance.new("TextButton")
+        CheckBtn.Size = UDim2.new(0.45, -4, 0, 34)
+        CheckBtn.Position = UDim2.new(0, 16, 0, 98)
+        CheckBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 120)
+        CheckBtn.Text = "Check Key"
+        CheckBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        CheckBtn.TextSize = 13
+        CheckBtn.Font = Enum.Font.FredokaOne
+        CheckBtn.Parent = KeyFrame
+
+        local BtnCorner1 = Instance.new("UICorner")
+        BtnCorner1.CornerRadius = UDim.new(0, 8)
+        BtnCorner1.Parent = CheckBtn
+
+        local GetKeyBtn = Instance.new("TextButton")
+        GetKeyBtn.Size = UDim2.new(0.45, -4, 0, 34)
+        GetKeyBtn.Position = UDim2.new(0.555, 0, 0, 98)
+        GetKeyBtn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+        GetKeyBtn.Text = "Discord Key"
+        GetKeyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        GetKeyBtn.TextSize = 12
+        GetKeyBtn.Font = Enum.Font.FredokaOne
+        GetKeyBtn.Parent = GetKeyBtn
+
+        local BtnCorner2 = Instance.new("UICorner")
+        BtnCorner2.CornerRadius = UDim.new(0, 8)
+        BtnCorner2.Parent = GetKeyBtn
+
+        local BackupBtn = Instance.new("TextButton")
+        BackupBtn.Size = UDim2.new(1, -32, 0, 32)
+        BackupBtn.Position = UDim2.new(0, 16, 0, 140)
+        BackupBtn.BackgroundColor3 = Color3.fromRGB(255, 140, 0)
+        BackupBtn.Text = "🔗 Nếu ko có Discord dùng cái này"
+        BackupBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        BackupBtn.TextSize = 12
+        BackupBtn.Font = Enum.Font.FredokaOne
+        BackupBtn.Parent = KeyFrame
+
+        local BtnCorner3 = Instance.new("UICorner")
+        BtnCorner3.CornerRadius = UDim.new(0, 8)
+        BtnCorner3.Parent = BackupBtn
+
+        local StatusText = Instance.new("TextLabel")
+        StatusText.Size = UDim2.new(1, -32, 0, 22)
+        StatusText.Position = UDim2.new(0, 16, 0, 182)
+        StatusText.BackgroundTransparency = 1
+        StatusText.Text = "Chọn hình thức lấy key để tiếp tục"
+        StatusText.TextColor3 = Color3.fromRGB(180, 180, 180)
+        StatusText.TextSize = 12
+        StatusText.Font = Enum.Font.SourceSans
+        StatusText.Parent = KeyFrame
+
+        makeDraggable(KeyFrame)
+
+        GetKeyBtn.MouseButton1Click:Connect(function()
+            if setclipboard then
+                setclipboard(KEY_LINK)
+                StatusText.Text = "✅ Đã copy link Discord!"
+                StatusText.TextColor3 = Color3.fromRGB(0, 255, 120)
+            end
+        end)
+
+        BackupBtn.MouseButton1Click:Connect(function()
+            if setclipboard then
+                setclipboard(BACKUP_LINK)
+                StatusText.Text = "✅ Đã copy link Fnote!"
+                StatusText.TextColor3 = Color3.fromRGB(255, 200, 0)
+            end
+        end)
+
+        CheckBtn.MouseButton1Click:Connect(function()
+            if KeyTextBox.Text == CORRECT_KEY then
+                StatusText.Text = "🎉 Key đúng! Đang tải Hub..."
+                StatusText.TextColor3 = Color3.fromRGB(0, 255, 120)
+                saveKeyCache(KeyTextBox.Text)
+                task.wait(1)
+                KeyFrame:Destroy()
+                loadMainHub()
+            else
+                StatusText.Text = "❌ Key không chính xác!"
+                StatusText.TextColor3 = Color3.fromRGB(255, 50, 50)
+            end
+        end)
+    end
+end)
