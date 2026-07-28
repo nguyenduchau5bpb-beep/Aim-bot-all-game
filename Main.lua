@@ -1,4 +1,4 @@
--- [[ MRGHOST HUB VIP - FIX AIMBOT TEAM & FIXED FOV ]]
+-- [[ MRGHOST HUB VIP - TRACER TOP-CENTER (OLD STYLE) ]]
 local success, err = pcall(function()
 
     -- Services
@@ -37,10 +37,11 @@ local success, err = pcall(function()
 
     local ESPEnabled = false
     local TracersEnabled = false
+    local TeamCheckEnabled = true
 
     -- Universal GUI Container
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "MrGhostHub_FixedAll"
+    ScreenGui.Name = "MrGhostHub_OldTracer"
     local guiParent = (gethui and gethui()) or CoreGui or (LocalPlayer and LocalPlayer:WaitForChild("PlayerGui"))
     ScreenGui.Parent = guiParent
     ScreenGui.ResetOnSpawn = false
@@ -51,9 +52,7 @@ local success, err = pcall(function()
         return Color3.fromHSV((tick() % speed) / speed, 0.8, 1)
     end
 
-    -- =========================================================
-    -- ⭕ FIX FOV CIRCLE BẰNG UI FRAME (CAM KẾT HIỆN 100%)
-    -- =========================================================
+    -- ⭕ FOV CIRCLE (UI FRAME)
     local FOVFrame = Instance.new("Frame")
     FOVFrame.Name = "FOVCircleFrame"
     FOVFrame.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -116,33 +115,29 @@ local success, err = pcall(function()
         end)
     end
 
-    -- =========================================================
-    -- 👥 NÂNG CẤP HÀM KIỂM TRA ĐỒNG MINH CHUẨN XÁC
-    -- =========================================================
+    -- 👥 HÀM KIỂM TRA ĐỒNG MINH
     local function isTeammate(player)
+        if not TeamCheckEnabled then return false end
         if player == LocalPlayer then return true end
-        
-        -- 1. Kiểm tra Roblox Team chuẩn
+
         if player.Team and LocalPlayer.Team then
-            if player.Team == LocalPlayer.Team then return true end
+            return player.Team == LocalPlayer.Team
         end
 
-        -- 2. Kiểm tra TeamColor
         if player.TeamColor and LocalPlayer.TeamColor then
-            if player.TeamColor == LocalPlayer.TeamColor then return true end
+            return player.TeamColor == LocalPlayer.TeamColor
         end
 
-        -- 3. Kiểm tra Leaderstats/Team Custom trong game
-        local myTeamVal = LocalPlayer:FindFirstChild("Team") or (LocalPlayer:FindFirstChild("leaderstats") and LocalPlayer.leaderstats:FindFirstChild("Team"))
-        local targetTeamVal = player:FindFirstChild("Team") or (player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("Team"))
-        if myTeamVal and targetTeamVal and myTeamVal.Value == targetTeamVal.Value then
-            return true
+        local myTeam = LocalPlayer:FindFirstChild("Team") or (LocalPlayer:FindFirstChild("leaderstats") and LocalPlayer.leaderstats:FindFirstChild("Team"))
+        local targetTeam = player:FindFirstChild("Team") or (player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("Team"))
+        if myTeam and targetTeam then
+            return myTeam.Value == targetTeam.Value
         end
 
         return false
     end
 
-    -- Optimized Aimbot Target Search
+    -- Aimbot Target Search
     local function getClosestEnemy()
         local closestPlayer = nil
         local shortestDistance = FOVRadius
@@ -168,7 +163,7 @@ local success, err = pcall(function()
         return closestPlayer
     end
 
-    -- ESP System
+    -- ESP Storage
     local ESP_Storage = {}
     local function createESP(player)
         if player == LocalPlayer then return end
@@ -206,8 +201,8 @@ local success, err = pcall(function()
     local function loadMainHub()
         local MainFrame = Instance.new("Frame")
         MainFrame.Name = "MainFrame"
-        MainFrame.Size = UDim2.new(0, 330, 0, 400)
-        MainFrame.Position = UDim2.new(0.5, -165, 0.3, -200)
+        MainFrame.Size = UDim2.new(0, 330, 0, 420)
+        MainFrame.Position = UDim2.new(0.5, -165, 0.3, -210)
         MainFrame.BackgroundColor3 = Color3.fromRGB(15, 17, 26)
         MainFrame.BackgroundTransparency = 0.15
         MainFrame.BorderSizePixel = 0
@@ -273,7 +268,7 @@ local success, err = pcall(function()
         Scroll.BackgroundTransparency = 1
         Scroll.BorderSizePixel = 0
         Scroll.ScrollBarThickness = 3
-        Scroll.CanvasSize = UDim2.new(0, 0, 0, 660)
+        Scroll.CanvasSize = UDim2.new(0, 0, 0, 710)
         Scroll.Parent = MainFrame
 
         local UIList = Instance.new("UIListLayout")
@@ -400,6 +395,8 @@ local success, err = pcall(function()
 
         createToggleCard("🎯 Aim Lock (Tự Khóa Địch)", false, 7, function(st) AimbotEnabled = st end)
 
+        createToggleCard("👥 Bật Chia Team (Đồng Minh/Địch)", true, 8, function(st) TeamCheckEnabled = st end)
+
         local PartBtn = Instance.new("TextButton")
         PartBtn.Size = UDim2.new(1, -4, 0, 36)
         PartBtn.BackgroundColor3 = Color3.fromRGB(24, 28, 42)
@@ -408,7 +405,7 @@ local success, err = pcall(function()
         PartBtn.TextColor3 = Color3.fromRGB(0, 230, 255)
         PartBtn.TextSize = 12
         PartBtn.Font = Enum.Font.GothamMedium
-        PartBtn.LayoutOrder = 8
+        PartBtn.LayoutOrder = 9
         PartBtn.Parent = Scroll
 
         local PartCorner = Instance.new("UICorner")
@@ -428,7 +425,7 @@ local success, err = pcall(function()
             PartBtn.Text = "🎯 Vị Trí Ngắm: " .. partsList[partIdx].name
         end)
 
-        createToggleCard("⭕ Hiện Vòng Tròn FOV", true, 9, function(st) 
+        createToggleCard("⭕ Hiện Vòng Tròn FOV", true, 10, function(st) 
             ShowFOV = st 
             FOVFrame.Visible = st
         end)
@@ -438,7 +435,7 @@ local success, err = pcall(function()
         SliderCard.Size = UDim2.new(1, -4, 0, 48)
         SliderCard.BackgroundColor3 = Color3.fromRGB(24, 28, 42)
         SliderCard.BackgroundTransparency = 0.2
-        SliderCard.LayoutOrder = 10
+        SliderCard.LayoutOrder = 11
         SliderCard.Parent = Scroll
 
         local SliderCorner = Instance.new("UICorner")
@@ -502,8 +499,8 @@ local success, err = pcall(function()
             end
         end)
 
-        createToggleCard("📦 ESP Box & Tên Player", false, 11, function(st) ESPEnabled = st end)
-        createToggleCard("⚡ Đường Kẻ Tracer Player", false, 12, function(st) TracersEnabled = st end)
+        createToggleCard("📦 ESP Box & Tên Player", false, 12, function(st) ESPEnabled = st end)
+        createToggleCard("⚡ Đường Kẻ Tracer Player", false, 13, function(st) TracersEnabled = st end)
 
         -- NÚT THU GỌN HUB TRÒN
         local ToggleMenuBtn = Instance.new("TextButton")
@@ -570,7 +567,7 @@ local success, err = pcall(function()
                 end
             end
 
-            -- ESP Rendering
+            -- ESP & TRACER RENDERING
             for player, drawings in pairs(ESP_Storage) do
                 local char = player.Character
                 if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChildOfClass("Humanoid") and char.Humanoid.Health > 0 then
@@ -603,7 +600,8 @@ local success, err = pcall(function()
                         end
 
                         if TracersEnabled then
-                            drawings.Tracer.From = Vector2.new(Camera.ViewportSize.X * 0.5, Camera.ViewportSize.Y)
+                            -- TRACER KIỂU CỦ: Kẻ từ ĐỈNH MÀN HÌNH (Top Center)
+                            drawings.Tracer.From = Vector2.new(Camera.ViewportSize.X * 0.5, 0)
                             drawings.Tracer.To = Vector2.new(pos.X, pos.Y)
                             drawings.Tracer.Color = espColor
                             drawings.Tracer.Visible = true
@@ -621,7 +619,7 @@ local success, err = pcall(function()
 
         game:GetService("StarterGui"):SetCore("SendNotification", {
             Title = "★ MRGHOST HUB VIP ★",
-            Text = "Đã fix phân biệt ĐỒNG MINH & Vòng FOV!",
+            Text = "Đã chuyển đường Tracer về ĐỈNH MÀN HÌNH!",
             Duration = 3
         })
     end
@@ -742,4 +740,3 @@ local success, err = pcall(function()
         end)
     end
 end)
- 
