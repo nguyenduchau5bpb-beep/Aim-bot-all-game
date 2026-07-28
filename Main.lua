@@ -1,4 +1,4 @@
--- [[ MRGHOST HUB VIP - ALL IN ONE ULTIMATE EDITION ]]
+-- [[ MRGHOST HUB VIP - ALL IN ONE ULTIMATE EDITION (FIXED) ]]
 local success, err = pcall(function()
 
     -- Services
@@ -443,7 +443,6 @@ local success, err = pcall(function()
         -- SECTION 3: FOV & ESP
         createToggleCard("⭕ Hiện Vòng Tròn FOV", true, 10, function(st)
             ShowFOV = st
-            FOVCircle.Visible = st
         end)
 
         -- FOV SLIDER CARD
@@ -493,7 +492,6 @@ local success, err = pcall(function()
             local posX = math.clamp(input.Position.X - SliderTrack.AbsolutePosition.X, 0, SliderTrack.AbsoluteSize.X)
             local percentage = posX / SliderTrack.AbsoluteSize.X
             FOVRadius = math.floor(30 + (percentage * 470))
-            FOVCircle.Radius = FOVRadius
             SliderFill.Size = UDim2.new(percentage, 0, 1, 0)
             SliderLabel.Text = "📏 Kích Thước FOV: " .. FOVRadius
         end
@@ -554,6 +552,17 @@ local success, err = pcall(function()
             end
         end)
 
+        -- 👉 FIX NOCLIP (TẮT BẬT CHUẨN XÁC VÀO STEPPED LOOP)
+        RunService.Stepped:Connect(function()
+            if noclipEnabled and LocalPlayer.Character then
+                for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end)
+
         -- RENDER LOOP MAIN
         RunService.RenderStepped:Connect(function()
             local rainbowColor = getRGBColor(3)
@@ -561,23 +570,23 @@ local success, err = pcall(function()
             ToggleStroke.Color = rainbowColor
             TitleGradient.Rotation = (tick() * 90) % 360
 
-            -- Handle Speed / Jump / Noclip
+            -- Handle Speed / Jump
             if LocalPlayer.Character then
                 local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
                 if hum then
                     if speedEnabled then hum.WalkSpeed = walkSpeedValue end
                     if jumpEnabled then hum.UseJumpPower = true; hum.JumpPower = jumpPowerValue end
                 end
-
-                if noclipEnabled then
-                    for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-                        if part:IsA("BasePart") then part.CanCollide = false end
-                    end
-                end
             end
 
-            -- Handle FOV Center
-            FOVCircle.Position = UserInputService:GetMouseLocation()
+            -- 👉 FIX HÀM HIỂN THỊ & CẬP NHẬT FOV
+            if ShowFOV then
+                FOVCircle.Visible = true
+                FOVCircle.Radius = FOVRadius
+                FOVCircle.Position = UserInputService:GetMouseLocation()
+            else
+                FOVCircle.Visible = false
+            end
 
             -- Handle Aimbot Lock
             if AimbotEnabled then
@@ -618,7 +627,6 @@ local success, err = pcall(function()
                         end
 
                         if TracersEnabled then
-                            -- 👉 CẬP NHẬT: KÉO TỪ GIỮA TẬN CÙNG TRÊN ĐỈNH MÀN HÌNH (Y = 0) DÙNG ĐÂM XUỐNG ĐỊCH
                             drawings.Tracer.From = Vector2.new(Camera.ViewportSize.X / 2, 0)
                             drawings.Tracer.To = Vector2.new(pos.X, pos.Y)
                             drawings.Tracer.Visible = true
@@ -796,3 +804,4 @@ local success, err = pcall(function()
         end)
     end
 end)
+ 
